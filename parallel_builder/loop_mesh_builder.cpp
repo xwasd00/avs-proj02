@@ -26,8 +26,8 @@ unsigned LoopMeshBuilder::marchCubes(const ParametricScalarField &field)
     size_t totalCubesCount = mGridSize*mGridSize*mGridSize;
 
     unsigned totalTriangles = 0;
-
     // 2. Loop over each coordinate in the 3D grid.
+    #pragma omp parallel for schedule(guided) reduction(+:totalTriangles)
     for(size_t i = 0; i < totalCubesCount; ++i)
     {
         // 3. Compute 3D position in the grid.
@@ -79,6 +79,8 @@ void LoopMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
     // Store generated triangle into vector (array) of generated triangles.
     // The pointer to data in this array is return by "getTrianglesArray(...)" call
     // after "marchCubes(...)" call ends.
-    
+    #pragma omp critical
+    {
     mTriangles.push_back(triangle);
+    }
 }
