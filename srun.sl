@@ -22,7 +22,7 @@ make
 #for threads in 18 36; do
 for threads in 18; do
     #for builder in "ref" "loop" "tree"; do
-    for builder in "loop"; do
+    for builder in "tree"; do
         # ref Elapsed Time: cca 23.5 s
         # loop 18 : cca 1.3 s
         # loop 36 : cca 0.7 s
