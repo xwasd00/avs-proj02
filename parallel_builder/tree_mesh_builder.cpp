@@ -1,7 +1,7 @@
 /**
  * @file    tree_mesh_builder.cpp
  *
- * @author  FULL NAME <xlogin00@stud.fit.vutbr.cz>
+ * @author  Michal Sova <xsovam00@stud.fit.vutbr.cz>
  *
  * @brief   Parallel Marching Cubes implementation using OpenMP tasks + octree early elimination
  *
