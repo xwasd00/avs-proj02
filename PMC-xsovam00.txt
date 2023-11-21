@@ -1,6 +1,6 @@
 Architektury Výpočetních Systémů (AVS 2023)
 Projekt č. 2 (PMC)
-Login: xlogin00
+Login: xsovam00
 
 Úloha 1: Paralelizace původního řešení
 ===============================================================================
@@ -8,10 +8,18 @@ Login: xlogin00
 1) Kterou ze smyček (viz zadání) je vhodnější paralelizovat a co způsobuje 
    neefektivitu paralelizaci té druhé?
 
+Je vhodnější paralelizovat smyčku v 'marchCubes'. Ve druhé smyčce dochází k neustálému vytváření vláken, což způsobuje zbytečnou režii navíc.
+
+
 2) Jaké plánování (rozdělení práce mezi vlákna) jste zvolili a proč? 
    Jaký vliv má velikost "chunk" při dynamickém plánování (8, 16, 32, 64)?
 
+schedule(guided) - nejlepší výsledky.
+
+
 3) Jakým způsobem zajišťujete ukládání trojúhelníků z několika vláken současně?
+
+Pomocí #pragma omp critical ve funkci emitTriangle.
 
 
 Úloha 2: Paralelní průchod stromem
@@ -19,23 +27,45 @@ Login: xlogin00
 
 1) Stručně popište použití OpenMP tasků ve vašem řešení.
 
+Tasky se větví/vytvářejí při rozdělení kostky na 8 částí, pokud není překročen "cut-off", tak se větví dál. Na "cut-off" hloubce se zavolá buildCube a vrátí se počet vygenerovaných polygonů. Všechny vlákna pak čekají na vygenerování polygonů na nejnižší úrovni.
+
+
 2) Jaký vliv má na vaše řešení tzv. "cut-off"? Je vhodné vytvářet nový 
    task pro každou krychli na nejnižší úrovni?
 
+Při zvětšení cut-off se zlepšil výpočet pro 36 jader ale zhoršil se výpočet pro 18 jader.
+Záleží na počtu jader.
+
+
 3) Jakým způsobem zajišťujete ukládání trojúhelníků z několika vláken současně?
+
+Pomocí nazvané #pragma omp critical(NAME).
+
 
 Úloha 3: Grafy škálování všech řešení
 ===============================================================================
 
 1) Stručně zhodnoťte efektivitu vytvořených řešení (na základě grafů ŠKÁLOVÁNÍ).
 
+Efektivnější je octree. Obě řešení se škálují s počtem elementů. 
+
+
 2) V jakém případě (v závislosti na počtu bodů ve vstupním souboru a velikosti 
    mřížky) bude vaše řešení 1. úlohy neefektivní? (pokud takový případ existuje)
+
+Při malém počtu bodů mude řešení méně efektivní.
+
 
 3) Je (nebo není) stromový algoritmus efektivnější z pohledu slabého škálování 
    vzhledem ke vstupu?
 
+Záleří na velikosti vstupu. Při malém vstupu není, při velkém je.
+
+
 4) Jaký je rozdíl mezi silným a slabým škálováním?
+
+
+
 
 Úloha 4: Analýza využití jader pomocí VTune
 ================================================================================
@@ -43,15 +73,16 @@ Login: xlogin00
 1) Jaké bylo průměrné využití jader pro všechny tři implementace s omezením na 
    18 vláken? Na kolik procent byly využity?
    
-   ref:
-   loop:
-   tree:
+   ref: 2.8% (na 36 jader) -> 5.6% (na 18 jader)
+   loop: 48.3% -> 96.6%
+   tree: 44.3% -> 88.6%
 
 2) Jaké bylo průměrné využití jader pro všechny tři implementace s využitím 
    všech jader? Na kolik procent se podařilo využít obě CPU?
    
-   ref:
-   loop:
-   tree:
+   ref: 2.8%
+   loop: 90.1%
+   tree: 67.0%
 
 3) Jaké jsou závěry z těchto měření?
+loop je nejefektivnější z pohledu využití jader.

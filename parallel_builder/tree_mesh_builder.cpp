@@ -33,9 +33,10 @@ unsigned TreeMeshBuilder::octree(const unsigned edge_size, const int offsetx, co
         return 0;
     }
 
-    // check threshold
-    const unsigned threshold_size = 3;
+    constexpr unsigned threshold_size = 3;
     unsigned totalTriangles = 0;
+
+    // check threshold and build cube if smaller than threshold
     if (edge_size < threshold_size){
         const size_t octreeCubesCount = edge_size * edge_size * edge_size;
         for (int i = 0; i < octreeCubesCount; i++){
@@ -43,22 +44,30 @@ unsigned TreeMeshBuilder::octree(const unsigned edge_size, const int offsetx, co
                                      (i / edge_size) % edge_size + offsety,
                                       i / (edge_size*edge_size) + offsetz);
 
-            totalTriangles += buildCube(cubeOffset, field);
+            
+            unsigned triangles = buildCube(cubeOffset, field);
+            totalTriangles += triangles;
         }
         return totalTriangles;
     }
-    // create cubes
+
+    // create new 8 cubes / octree
     for (int i = 0; i < 8; i++){
+        #pragma omp task shared(totalTriangles, half_edge, offsetx, offsety, offsetz)
+        {
         unsigned triangles = octree(half_edge, 
                                 (i % 2) * half_edge + offsetx, 
                                 ((i / 2) % 2) * half_edge + offsety, 
                                 (i / 4) * half_edge + offsetz, 
                                 field);
+        #pragma omp critical(TRIANGLE)
+        {
         totalTriangles += triangles;
-
+        }
+        }
     }
+    #pragma omp taskwait
     return totalTriangles;
-
 }
 
 unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
@@ -69,9 +78,13 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
     // code and only when that works add OpenMP tasks to achieve parallelism.
     
     unsigned totalTriangles = 0;
-
+    #pragma omp parallel
+    {
+    #pragma omp single
+    {
     totalTriangles = octree(mGridSize, 0, 0, 0, field);
-
+    }
+    }
     return totalTriangles;
 }
 
@@ -110,6 +123,8 @@ void TreeMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
     // Store generated triangle into vector (array) of generated triangles.
     // The pointer to data in this array is return by "getTrianglesArray(...)" call
     // after "marchCubes(...)" call ends.
-
+    #pragma omp critical(STORE)
+    {
     mTriangles.push_back(triangle);
+    }
 }
