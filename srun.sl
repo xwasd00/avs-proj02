@@ -19,16 +19,9 @@ rm -f *.obj
 CC=icc CXX=icpc cmake ..
 make
 
-#for threads in 18 36; do
 for threads in 18 36; do
-    #for builder in "loop" "tree"; do
-    for builder in "loop"; do
-        # ref Elapsed Time: cca 23.5 s
-        # loop 18 : cca 1.3 s
-        # loop 36 : cca 0.7 s
-        # tree 18 : cca 0.4 s
-        # tree 36 : cca 1.1 s
-        ./PMC --builder ${builder} -t ${threads} --grid 128 ../data/bun_zipper_res3.pts ${builder}-${threads}-bun_zipper_res3.obj
+    for builder in "loop" "tree"; do
+        ./PMC --builder ${builder} -t ${threads} --grid 128 ../data/bun_zipper_res4.pts ${builder}-${threads}-bun_zipper_res3.obj
     done
 done
 #./PMC --builder ref -t 18 --grid 128 ../data/bun_zipper_res3.pts ref-bun_zipper_res3.obj
